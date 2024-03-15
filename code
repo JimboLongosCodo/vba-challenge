@@ -1,0 +1,91 @@
+Sub ticker()
+
+Dim ws As Worksheet
+Dim sheet As String
+Dim ticker, maxTick, minTick, VolTick As String
+Dim i, lastRow, firstOpen, lastClose, sum, sumrow As Long
+Dim minPer, maxPer, maxVol As Double
+'For each ticker
+
+For Each ws In Worksheets
+    ws.Cells(1, 9).Value = "Ticker"
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    ws.Cells(1, 12).Value = "Total Stock Volume"
+    lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    sum = 0
+    sumrow = 2
+    firstOpen = ws.Cells(2, 3).Value
+    
+    For i = 2 To lastRow
+        sum = sum + ws.Cells(i, 7).Value
+        If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+            ticker = ws.Cells(i, 1).Value
+            lastClose = ws.Cells(i, 6).Value
+            ws.Cells(sumrow, 9).Value = ticker
+            If lastClose = firstOpen Then
+                ws.Cells(sumrow, 10).Value = 0
+                ws.Cells(sumrow, 11).Value = 0
+            Else
+            ws.Cells(sumrow, 10).Value = Format(lastClose - firstOpen, "#.##")
+            ws.Cells(sumrow, 11).Value = Format(((lastClose / firstOpen) - 1), "#.####%")
+            End If
+            ws.Cells(sumrow, 12).Value = Format(sum, "#,###")
+            sum = 0
+            If ws.Cells(sumrow, 10).Value < 0 Then
+                ws.Cells(sumrow, 10).Interior.ColorIndex = 3
+            Else
+                ws.Cells(sumrow, 10).Interior.ColorIndex = 4
+            End If
+            sumrow = sumrow + 1
+            firstOpen = ws.Cells(i + 1, 3).Value
+        End If
+    Next i
+
+'For greatest change
+ws.Cells(2, 15).Value = "Greatest % Increase"
+ws.Cells(3, 15).Value = "Greatest % Decrease"
+ws.Cells(4, 15).Value = "Greatest Total Volume"
+ws.Cells(1, 16).Value = "Ticker"
+ws.Cells(1, 17).Value = "Value"
+
+
+lastRow = ws.Cells(Rows.Count, 9).End(xlUp).Row
+
+maxTick = ws.Cells(2, 9).Value
+minTick = ws.Cells(2, 9).Value
+VolTick = ws.Cells(2, 9).Value
+maxPerc = ws.Cells(2, 11).Value
+minPerc = ws.Cells(2, 11).Value
+maxVol = ws.Cells(2, 12).Value
+
+    For i = 3 To lastRow
+        If ws.Cells(i, 11).Value >= maxPerc Then
+            maxPerc = ws.Cells(i, 11).Value
+            maxTick = ws.Cells(i, 9).Value
+        End If
+        
+        If ws.Cells(i, 11).Value <= minPerc Then
+            minPerc = ws.Cells(i, 11).Value
+            minTick = ws.Cells(i, 9).Value
+        End If
+        
+        If ws.Cells(i, 12).Value >= maxVol Then
+            maxVol = ws.Cells(i, 12).Value
+            VolTick = ws.Cells(i, 9).Value
+        End If
+    Next i
+
+ws.Cells(2, 16).Value = maxTick
+ws.Cells(3, 16).Value = minTick
+ws.Cells(4, 16).Value = VolTick
+ws.Cells(2, 17).Value = Format(maxPerc, "#.####%")
+ws.Cells(3, 17).Value = Format(minPerc, "#.####%")
+ws.Cells(4, 17).Value = Format(maxVol, "#,###")
+
+ws.Columns("I:Q").AutoFit
+
+Next ws
+
+End Sub
+
